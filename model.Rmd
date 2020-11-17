@@ -70,7 +70,7 @@ invlogit(-1.23+0.69*1)=0.37
 invlogit(-1.23)=0.23
 
 
-## Add random variable into logitic model 
+## Add random variable into logistic model 
 ```{r}
 M3 <- lmer(accuracy~(1|cognate),data=eng1)
 print(M3)
