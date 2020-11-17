@@ -5,6 +5,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load("lme4")
 ```
 
 ```{r}
@@ -67,3 +68,20 @@ summary(M2)
 
 invlogit(-1.01+0.27*1)=0.32
 invlogit(-1.01)=0.26
+
+## Add random variable into logitic model 
+```{r}
+M3 <- lmer(accuracy~(1|cognate),data=eng1)
+print(M3)
+```
+
+```{r}
+M4 <- lmer(accuracy~(1|cognate),data=spa1)
+print(M4)
+```
+
+```{r}
+
+```
+
+
