@@ -81,6 +81,21 @@ M4 <- lmer(accuracy~(1|cognate),data=spa1)
 print(M4)
 ```
 
+##add difficult into dataset
+```{r}
+spa2 <- read.csv("spa1.csv",header = T)
+eng2 <- read.csv("eng1.csv",header = T)
+eng2$diff <- as.numeric(eng2$diff)
+spa2$diff <- as.numeric(spa2$diff)
+```
+
+## refit model 
+```{r}
+M5 <- glmer(accuracy~(1|cognate)+diff,data=eng2)
+print(M5)
+M6 <- glmer(accuracy~(1|cognate)+diff,data=spa2)
+print(M6)
+```
 
 
 
