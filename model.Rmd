@@ -89,7 +89,7 @@ eng2$diff <- as.numeric(eng2$diff)
 spa2$diff <- as.numeric(spa2$diff)
 ```
 
-## refit model 
+## refit the model 
 ```{r}
 M5 <- glmer(accuracy~1+(1|cognate)+diff,data=eng2,family=binomial(link="logit"))
 print(M5)
