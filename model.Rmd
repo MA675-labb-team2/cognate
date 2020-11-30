@@ -91,11 +91,30 @@ spa2$diff <- as.numeric(spa2$diff)
 
 ## refit the model 
 ```{r}
-M5 <- glmer(accuracy~1+(1|cognate)+diff,data=eng2,family=binomial(link="logit"))
+M5 <- glmer(accuracy~cognate+(1|subject)+diff,data=eng2,family=binomial(link="logit"))
 print(M5)
-M6 <- glmer(accuracy~1+(1|cognate)+diff,data=spa2,family=binomial(link="logit"))
-print(M6)
+
+library(boot)
+inv.logit(2.1693)
+inv.logit(0.7015)
+inv.logit(-0.8832)
 ```
 
+Interpret:
+Intercept: For non-cognate words with same difficulty level, the possibility of answer the words accurately is 89.76%.
+Cognate: Words with same difficulty level, cognate worlds tend to have 66.85% higher possibility to be correctly answered.
+diff: For non-Cognates word, it has 29.25% higher possibility to be correctly answered as the difficulty increasing. 
 
+```{r}
+M6 <- glmer(accuracy~cognate+(1|subject)+diff,data=spa2,family=binomial(link="logit"))
+print(M6)
+inv.logit(1.055)
+inv.logit(1.1634)
+inv.logit(-0.8374)
+```
+
+Interpret:
+Intercept: For non-cognate words with same difficulty level, the possibility of answer the words accurately is 74.17%.
+Cognate: Words with same difficulty level, cognate worlds tend to have 76.195% higher possibility to be correctly answered.
+diff: For non-Cognates word, it has 30.2% higher possibility to be correctly answered as the difficulty increasing. 
 
