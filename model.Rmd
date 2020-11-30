@@ -30,7 +30,7 @@ eng1$cognate[eng1$word %in% c('comb','broom','octopus','mushroom','hanger','whee
 eng1$cognate[!eng1$word %in% c('comb','broom','octopus','mushroom','hanger','wheelchair','snail','seahorse','wreath',
 'beaver','stilts','acorn','knocker','muzzle','funnel','noose','latch','scroll','tongs','yoke','trellis','protractor')] <- 1
 eng1
-write.csv(eng1,"eng1.csv",row.names=FALSE)
+#write.csv(eng1,"eng1.csv",row.names=FALSE)
 ```
 
 ```{r}
@@ -47,7 +47,7 @@ spa1$cognate[spa1$word %in% c('comb','broom','octopus','mushroom','hanger','whee
 spa1$cognate[!spa1$word %in% c('comb','broom','octopus','mushroom','hanger','wheelchair','snail','seahorse','wreath',
 'beaver','stilts','acorn','knocker','muzzle','funnel','noose','latch','scroll','tongs','yoke','trellis','protractor')] <- 1
 spa1
-write.csv(spa1,"spa1.csv",row.names=FALSE)
+#write.csv(spa1,"spa1.csv",row.names=FALSE)
 ```
 
 ```{r}
@@ -72,28 +72,28 @@ invlogit(-1.23)=0.23
 
 ## Add random variable into logistic model 
 ```{r}
-M3 <- lmer(accuracy~(1|cognate),data=eng1)
+M3 <- glmer(accuracy~1+(1|cognate),data=eng1,family=binomial(link="logit"))
 print(M3)
 ```
 
 ```{r}
-M4 <- lmer(accuracy~(1|cognate),data=spa1)
+M4 <- glmer(accuracy~1+(1|cognate),data=spa1,family=binomial(link="logit"))
 print(M4)
 ```
 
-##add difficult into dataset
+##add difficulty into the dataset
 ```{r}
-spa2 <- read.csv("spa1.csv",header = T)
-eng2 <- read.csv("eng1.csv",header = T)
+spa2 <- read.csv("spa2.csv",header = T)
+eng2 <- read.csv("eng2.csv",header = T)
 eng2$diff <- as.numeric(eng2$diff)
 spa2$diff <- as.numeric(spa2$diff)
 ```
 
 ## refit model 
 ```{r}
-M5 <- glmer(accuracy~(1|cognate)+diff,data=eng2)
+M5 <- glmer(accuracy~1+(1|cognate)+diff,data=eng2,family=binomial(link="logit"))
 print(M5)
-M6 <- glmer(accuracy~(1|cognate)+diff,data=spa2)
+M6 <- glmer(accuracy~1+(1|cognate)+diff,data=spa2,family=binomial(link="logit"))
 print(M6)
 ```
 
