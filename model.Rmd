@@ -125,13 +125,41 @@ diff: For non-Cognates word, it has 30.2% higher possibility to be correctly ans
 ```{r}
 comb <- read.csv("comb.csv",header=T)
 comb <- unite(comb,"accuracy",c("eng.acc","spa.acc"),sep="",remove = F)
+comb<- comb[-115,]
+comb$category <- rep(NA,1143)
+for (i in 1:1143){
+  if (comb$eng.acc[i] == 0 && comb$spa.acc[i] == 0) {
+    comb$category[i] <- 1 
+  }
+  if (comb$eng.acc[i] == 0 && comb$spa.acc[i] == 1) {
+    comb$category[i] <- 2 
+  }
+  if (comb$eng.acc[i] == 1 && comb$spa.acc[i] == 0) {
+    comb$category[i] <- 3 
+  }
+  if (comb$eng.acc[i] == 1 && comb$spa.acc[i] == 1) {
+    comb$category[i] <- 4
+  }
+}
 ```
 
 ```{r}
-comb$accuracy <- as.numeric(comb$accuracy)
-library(nnet)
-M7 <- multinom(accuracy~cognate+diff,data=comb)
+#multinomial model
+M7 <- polr(factor(category)~cognate+diff,data=comb)
 print(summary(M7))
 ```
+
+Interpretation: 
+for $$z=0.5524*cognate-0.5502*diff$$, 
+$$
+\left\{  
+             \begin{array}{**lr**}  
+             category=1, &if \quad z<-1.9780\\  
+             category=2, & if \quad -1.9780<z<-1.4136\\  
+             category=3, & if \quad -1.4136<z<-0.1001\\
+             category=4, & if \quad z>-0.1001
+             \end{array}  
+\right.
+$$
 
 
