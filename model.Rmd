@@ -4,7 +4,7 @@ title: "Model"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-pacman::p_load("lme4")
+pacman::p_load("ggplot2","tidyverse","rstanarm","dplyr","pwr","MASS","arm","lme4","tidyr")
 ```
 
 ```{r}
@@ -92,12 +92,14 @@ spa2$diff <- as.numeric(spa2$diff)
 ## refit the model 
 ```{r}
 M5 <- glmer(accuracy~cognate+(1|subject)+diff,data=eng2,family=binomial(link="logit"))
-print(M5)
+print(summary(M5))
 
 library(boot)
 inv.logit(2.1693)
 inv.logit(0.7015)
 inv.logit(-0.8832)
+
+#lattice::dotplot(ranef(M5,which="subject",condVar=TRUE))
 ```
 
 Interpret:
@@ -107,7 +109,7 @@ diff: For non-Cognates word, it has 29.25% higher possibility to be correctly an
 
 ```{r}
 M6 <- glmer(accuracy~cognate+(1|subject)+diff,data=spa2,family=binomial(link="logit"))
-print(M6)
+print(summary(M6))
 inv.logit(1.055)
 inv.logit(1.1634)
 inv.logit(-0.8374)
@@ -117,4 +119,19 @@ Interpret:
 Intercept: For non-cognate words with same difficulty level, the possibility of answer the words accurately is 74.17%.
 Cognate: Words with same difficulty level, cognate worlds tend to have 76.195% higher possibility to be correctly answered.
 diff: For non-Cognates word, it has 30.2% higher possibility to be correctly answered as the difficulty increasing. 
+
+
+## Mixed effect logistic regression
+```{r}
+comb <- read.csv("comb.csv",header=T)
+comb <- unite(comb,"accuracy",c("eng.acc","spa.acc"),sep="",remove = F)
+```
+
+```{r}
+comb$accuracy <- as.numeric(comb$accuracy)
+library(nnet)
+M7 <- multinom(accuracy~cognate+diff,data=comb)
+print(summary(M7))
+```
+
 
