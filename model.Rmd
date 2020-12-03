@@ -113,6 +113,8 @@ print(summary(M6))
 inv.logit(1.055)
 inv.logit(1.1634)
 inv.logit(-0.8374)
+
+lattice::dotplot(ranef(M6,which="subject",condVar=TRUE))
 ```
 
 Interpret:
