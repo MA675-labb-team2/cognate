@@ -99,7 +99,7 @@ inv.logit(2.1693)
 inv.logit(0.7015)
 inv.logit(-0.8832)
 
-#lattice::dotplot(ranef(M5,which="subject",condVar=TRUE))
+lattice::dotplot(ranef(M5,which="subject",condVar=TRUE))
 ```
 
 Interpret:
