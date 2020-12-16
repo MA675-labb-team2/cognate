@@ -158,7 +158,7 @@ plot(M10)
 
 Revision: may need to include language:
 language=0: spanish as L1 native language; english nonnative
-languge=1: english as L1 native language;spanish nonnative
+language=1: english as L1 native language;spanish nonnative
 ```{r}
 M11<- brm(accuracy~cognate+(1|subject)+diff+L2AoA+Language,data=spa3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
 print(summary(M9))
