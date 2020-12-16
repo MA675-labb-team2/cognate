@@ -160,17 +160,51 @@ Revision: may need to include language:
 language=0: spanish as L1 native language; english nonnative
 languge=1: english as L1 native language;spanish nonnative
 ```{r}
-M9<- brm(accuracy~cognate+(1|subject)+diff+L2AoA+Language,data=spa3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
+M11<- brm(accuracy~cognate+(1|subject)+diff+L2AoA+Language,data=spa3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
 print(summary(M9))
 ```
 
 ```{r}
-M10 <- brm(accuracy~cognate+(1|subject)+diff+L2AoA+Language,data=eng3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
+M12<- brm(accuracy~cognate+(1|subject)+diff+L2AoA+Language,data=eng3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
 print(summary(M10))
 ```
 
+
+#Trace and Density plots
 ```{r}
-plot(M9)
-plot(M10)
+plot(M11)
+plot(M12)
+```
+
+
+#### WAIC and LOO
+```{r}
+waic1<-waic(M7)
+waic2<-waic(M8)
+waic3<-waic(M11)
+waic4<-waic(M12)
+```
+
+
+```{r}
+loo1<-loo(M7)
+loo2<-loo(M8)
+```
+
+```{r}
+loo3<-loo(M9)
+loo4<-loo(M10)
+loo5<-loo(M11)
+loo6<-loo(M12)
+```
+
+```{r}
+#Spanish:
+loo_compare(loo1,loo3,loo5)
+```
+
+```{r}
+#English:
+loo_compare(loo2,loo4,loo6)
 ```
 
