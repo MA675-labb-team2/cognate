@@ -99,7 +99,7 @@ inv.logit(2.1693)
 inv.logit(0.7015)
 inv.logit(-0.8832)
 
-lattice::dotplot(ranef(M5,which="subject",condVar=TRUE))
+#lattice::dotplot(ranef(M5,which="cognate",condVar=TRUE))
 ```
 
 Interpret:
@@ -122,9 +122,17 @@ Intercept: For non-cognate words with same difficulty level, the possibility of 
 Cognate: Words with same difficulty level, cognate worlds tend to have 76.195% higher possibility to be correctly answered.
 diff: For non-Cognates word, it has 30.2% higher possibility to be correctly answered as the difficulty increasing. 
 
+```{r}
+c1 <- c("eng","spa")
+coef<- c("0.70146","1.16337")
+se <- c("0.17812","0.17547")
+plot <- data.frame(c1,coef,se)
+
+ggplot(data=plot,aes(x=coef,y=se))
+```
 
 ## Mixed effect logistic regression
-```{r}
+```{}
 comb <- read.csv("comb.csv",header=T)
 comb <- unite(comb,"accuracy",c("eng.acc","spa.acc"),sep="",remove = F)
 comb<- comb[-115,]
@@ -145,7 +153,7 @@ for (i in 1:1143){
 }
 ```
 
-```{r}
+```{}
 #multinomial model
 M7 <- polr(factor(category)~cognate+diff,data=comb)
 print(summary(M7))
@@ -163,5 +171,16 @@ $$
              \end{array}  
 \right.
 $$
+
+### Try Multinomial analysis with brms
+```{r}
+library(brms)
+```
+```{r}
+M7 <- brm(accuracy~cognate+(1|subject)+diff,data=spa2,family=binomial(link="logit"))
+```
+
+
+
 
 
