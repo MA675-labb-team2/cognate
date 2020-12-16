@@ -177,14 +177,17 @@ $$
 library(brms)
 ```
 ```{r}
-M7 <- brm(accuracy~cognate+(1|subject)+diff,data=spa2,family=bernoulli)
+M7 <- brm(accuracy~cognate+(1|subject)+diff,data=spa2,family=bernoulli,prior = c(set_prior("normal(0,8)")))
 print(summary(M7))
 ```
 
 ```{r}
-M8 <- brm(accuracy~cognate+(1|subject)+diff,data=eng2,family=bernoulli)
+M8 <- brm(accuracy~cognate+(1|subject)+diff,data=eng2,family=bernoulli,prior = c(set_prior("normal(0,8)")))
 print(summary(M8))
 ```
 
-
+```{r}
+plot(M7)
+plot(M8)
+```
 
