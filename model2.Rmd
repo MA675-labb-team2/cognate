@@ -1,0 +1,160 @@
+---
+title: "model2"
+author: "Lab B Team 2"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load("ggplot2","tidyverse","rstanarm","dplyr","pwr","MASS","arm","lme4","tidyr","boot","brms")
+```
+
+```{r}
+spa3<-read.csv('spa3.csv')
+```
+
+```{r}
+eng3<-read.csv('eng3.csv')
+```
+
+```{r}
+#logistic regression model for english data:
+M1<-glm(accuracy~cognate, family=binomial(link="logit"),data=eng3)
+summary(M1)
+```
+
+```{r}
+#Intercept and coefficient for cognate:
+inv.logit(-0.58)
+inv.logit(-0.58+0.35)
+```
+
+```{r}
+#logistic regression model for spanish data:
+M2<-glm(accuracy~cognate, family=binomial(link="logit"),data=spa3)
+summary(M2)
+```
+
+
+```{r}
+inv.logit(-1.28)
+inv.logit(-1.28+0.67)
+```
+
+## Add random variable into logistic model 
+```{r}
+M3 <- glmer(accuracy~1+(1|cognate),data=eng3,family=binomial(link="logit"))
+print(M3)
+```
+
+```{r}
+M4 <- glmer(accuracy~1+(1|cognate),data=spa3,family=binomial(link="logit"))
+print(M4)
+```
+
+
+## refit the model with subject levels
+```{r}
+M5 <- glmer(accuracy~cognate+(1|subject)+diff,data=eng3,family=binomial(link="logit"))
+print(summary(M5))
+```
+
+```{r}
+inv.logit(2.08652)
+inv.logit(2.08652+0.74409)
+inv.logit(2.08652-0.8832)
+```
+
+Interpret:
+Intercept: For non-cognate words with same difficulty level, the possibility of answer the words accurately is 88.96%.
+Cognate: Words with same difficulty level, cognate worlds tend to have 94.43% higher possibility to be correctly answered.
+diff: For non-Cognates word, it has 76.91% higher possibility to be correctly answered as the difficulty increasing. 
+
+```{r}
+M6 <- glmer(accuracy~cognate+(1|subject)+diff,data=spa3,family=binomial(link="logit"))
+print(summary(M6))
+```
+
+Interpret:
+Intercept: For non-cognate words with same difficulty level, the possibility of answer the words accurately is 74.17%.
+Cognate: Words with same difficulty level, cognate worlds tend to have 76.195% higher possibility to be correctly answered.
+diff: For non-Cognates word, it has 30.2% higher possibility to be correctly answered as the difficulty increasing. 
+
+```{r}
+inv.logit(0.84823)
+inv.logit(0.84823+1.16385)
+inv.logit(0.84823-0.83898)
+```
+
+Interpret:
+Intercept: For non-cognate words with same difficulty level, the possibility of answer the words accurately is 70.02%.
+Cognate: Words with same difficulty level, cognate worlds tend to have 88.20% higher possibility to be correctly answered.
+diff: For non-Cognates word, it has 50.23% higher possibility to be correctly answered as the difficulty increasing. 
+
+
+## Mixed effect logistic regression
+```{r}
+#comb <- read.csv("comb.csv",header=T)
+#comb <- unite(comb,"accuracy",c("eng.acc","spa.acc"),sep="",remove = F)
+#comb<- comb[-115,]
+#comb$category <- rep(NA,1143)
+#for (i in 1:1143){
+ # if (comb$eng.acc[i] == 0 && comb$spa.acc[i] == 0) {
+  #  comb$category[i] <- 1 
+  #}
+  #if (comb$eng.acc[i] == 0 && comb$spa.acc[i] == 1) {
+  #  comb$category[i] <- 2 
+  #}
+ ## if (comb$eng.acc[i] == 1 && comb$spa.acc[i] == 0) {
+   # comb$category[i] <- 3 
+  #}
+ # if (comb$eng.acc[i] == 1 && comb$spa.acc[i] == 1) {
+ #   comb$category[i] <- 4
+ # }
+
+```
+
+```{r}
+#multinomial model
+#M7 <- polr(factor(category)~cognate+diff,data=comb)
+#print(summary(M7))
+```
+
+### Try Multinomial analysis with brms
+Note: One NA in spa3: no accuracy for word "knocker" (ID: BUBA46).
+```{r}
+M7 <- brm(accuracy~cognate+(1|subject)+diff,data=spa3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
+print(summary(M7))
+```
+
+```{r}
+M8 <- brm(accuracy~cognate+(1|subject)+diff,data=eng3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
+print(summary(M8))
+```
+
+```{r}
+plot(M7)
+plot(M8)
+```
+
+### Adding L2AoA predictor.
+L2:nonnative language
+AoA: age of acquisition
+
+```{r}
+M9<- brm(accuracy~cognate+(1|subject)+diff+L2AoA,data=spa3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
+print(summary(M9))
+```
+
+```{r}
+M10 <- brm(accuracy~cognate+(1|subject)+diff+L2AoA,data=eng3,family=bernoulli,prior = c(set_prior("normal(0,8)")))
+print(summary(M10))
+```
+
+```{r}
+plot(M9)
+plot(M10)
+```
+
+
+
