@@ -177,10 +177,14 @@ $$
 library(brms)
 ```
 ```{r}
-M7 <- brm(accuracy~cognate+(1|subject)+diff,data=spa2,family=binomial(link="logit"))
+M7 <- brm(accuracy~cognate+(1|subject)+diff,data=spa2,family=bernoulli)
+print(summary(M7))
 ```
 
-
+```{r}
+M8 <- brm(accuracy~cognate+(1|subject)+diff,data=eng2,family=bernoulli)
+print(summary(M8))
+```
 
 
 
