@@ -1,0 +1,171 @@
+---
+title: "Multinomial"
+author: "Yu Du"
+date: "2020/12/18"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load("ggplot2","tidyverse","rstanarm","dplyr","pwr","MASS","arm","lme4","tidyr","boot","brms")
+```
+
+```{r}
+#datasets.
+eng3<-read.csv('eng3.csv')
+spa3<-read.csv('spa3.csv')
+```
+
+```{r}
+#eng3
+```
+
+```{r}
+#spa3
+```
+
+```{r}
+eng3$accuracy_spanish<-spa3$accuracy
+```
+
+```{r}
+mult<-eng3
+```
+
+```{r}
+colnames(mult)[4]<-'accuracy_english'
+```
+
+```{r}
+#Change the order of columns.
+mult <- mult[, c(1, 2, 3,4,10,5,6,7,8,9)]
+```
+
+```{r}
+#One NA in the dataset, removed
+mult<- mult[-115,]
+mult$response <- NA
+```
+
+```{r}
+#Create levels of responses for the multinomial model
+for (i in 1:1187) {
+  if (mult$accuracy_english[i]=="1"){
+    if(mult$accuracy_spanish[i]=="0"){
+     mult$response[i] <- "right in English"
+    } else {
+       mult$response[i] <- "both right"
+    }
+  } else {
+    if(mult$accuracy_spanish[i]=="0"){
+      mult$response[i] <- "both wrong"
+    } else{
+      mult$response[i] <- "right in Spanish"
+    }
+  }
+}
+```
+
+```{r}
+#mult
+```
+
+```{r}
+#Fit the first multinomial model
+#b1 <- brm (response ~ cognate+ diff+(1|subject) , data=mult,
+                       # family="categorical")
+```
+
+```{r}
+#Take long time to run.
+b1<-read_rds("b1.rds")
+print(summary(b1))
+```
+
+```{r}
+#saveRDS(b1,"b1.rds")
+```
+
+```{r}
+#Fit the second multinomial model with L2AoA predictor and Language predictor
+#b3 <-brm (response ~ cognate+ diff+(1|subject)+L2AoA+Language, data=mult,family="categorical")
+#print(summary(b3))
+```
+
+```{r}
+#saveRDS(b3,"b2.rds")
+```
+
+```{r}
+loo1<-loo(b1)
+#loo2<-loo(b3)
+```
+
+```{r}
+#loo_compare(loo1,loo2)
+```
+
+```{r}
+#Get some warnings when compare loo of b1 and b3, so refit b3.
+#b4 <-brm (response ~ cognate+ diff+(1|subject)+L2AoA+Language, data=mult,family="categorical",save_all_pars=TRUE)
+b4<-read_rds("b4.rds")
+print(summary(b4))
+```
+
+```{r}
+loo3<-loo(b4,moment_match = TRUE)
+```
+
+```{r}
+#saveRDS(b4,"b4.rds")
+```
+
+```{r}
+loo(b1,b4)
+```
+```{r}
+#loo compare b1,b4
+loo_compare(loo1,loo3)
+```
+
+b4 is better from loo_compare.
+
+```{r}
+#plot(conditional_effects(b1, effects = "cognate",categorical=TRUE))
+```
+
+```{r}
+# relationship between response and cognate.
+plot(conditional_effects(b4, effects = "cognate",categorical=TRUE))
+```
+
+```{r}
+# relationship between response and difficulty levels.
+plot(conditional_effects(b4, effects = "diff",categorical=TRUE))
+```
+
+
+
+```{r}
+#plot(b1, pars = c("cognate"))
+```
+
+```{r}
+#Trace and density plots of "cognate"
+plot(b4, pars = c("cognate"))
+```
+
+```{r}
+#pp_check(b1,nsamples=100)
+```
+
+```{r}
+pp_check(b4,nsamples=100)
+```
+
+```{r}
+fixef(b4)
+```
+
+
+
