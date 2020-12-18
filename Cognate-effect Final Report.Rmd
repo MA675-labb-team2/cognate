@@ -1,0 +1,59 @@
+---
+title: "Cognate-effect Final Report"
+author: "Ziyi Bai; Yu Du; Xiaozhou Lu; Jinzhe Zhang"
+date: "12/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Abstract
+
+In this project, we explored the "cognate effect" in bilingual aphasia patients. After including the information of patient's accuracy from the information of our client Manuel Marte, we layered the difficulty of the words from 1 to 6 and took each patient's age of acquisition of non native language into consideration. Based on the characteristic of our dataset, we built a logistic regression with random intercept and multinomial regression with random intercept to interpret the cognate effect. The logistic regression shows that cognate words tend to more likely to be answered correctly and more difficult words tend to have higher level of accuracy. The multinomial models are convergence for all variables which is a good sign. Then, in the following modeling part, we will discuss the results of each model in detail.
+
+### Introduction
+
+Our client, Manuel Marte, is studying Spanish - English bilingual individuals with aphasia and seeks to understand the "cognate effect" for these subject and how it compares with healthy sunjects which have been previously studied. Our dataset based on Boston Naming Test: patients are asked to name an object both in English and Spanish. 
+
+We have 22 patients in the dataset, which age range from 25 to 80. 22 of them are Spanish dominant patient and 4 of them are English dominant patient. In accuracy column, we coded people correctly name the object into 0 and people incorrectly name the object into 1. In cog column, we coded cognate word into 1 and non-cognate word into 0. In diff column, we leveled our word from difficult 1 to difficult 6 based on the information from 
+
+
+
+
+### Logistic Regression
+
+
+
+
+
+### Multinomial Regression
+
+
+
+
+
+### Conclusion
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
