@@ -36,6 +36,13 @@ In the following part, we mainly interpret the results of logistic regression an
 
 ### Conclusion
 
+We tried logistic regression. We still divide the data into two groups: Spanish and English. We first included only cognate as the only factor, as our baseline to find the optimal model by comparing it. By using the glmer package, we divide the words into different subject levels. When the words are in English and have the same difficulty level, cognate words will have a higher probability (94.43% higher) to answer correctly. When the words are in Spanish and the difficulty level is the same, cognate words will have a higher probability (76.195.% higher) to answer correctly.
+
+Before the fit model, we processed the missing data in the data, and explored the influence of Spanish and English cognate words on the accuracy rate. We divided the data of all subjects into four categories, 1. Spanish and English is correct, 2. Spanish is correct, English is wrong, 3. Spanish is wrong, and English is correct. 4. Both languages are wrong. At the same time, considering the differences of each participant to words, we will use random intercept to express this phenomenon. Our group fits three mutinomial equations, and compares the influence of cognate words through the LOO equation. In the first equation, our group did not include any demographic information. We will use it as a baseline to compare with other models to arrive at a relatively optimal model. In b4, we included demographic information AOA and language as variables. We use cognate as the independent variable and the probability of being correct as the dependent variable. It can be seen that with the inclusion of demographic data, as the degree of cognate becomes stronger, the possibility of simultaneous errors in two languages gradually decreases. The probability that the pair and all are correct gradually rises. Therefore, according to the results of the graph, we can conclude that the influence of cognate has a positive influence on the correctness rate. When we replace cognate with difficulty, the possibility of correctness decreases as the difficulty increases, and the possibility of error increases, which is in line with our expectations. It also proved the reliability of the model.
+
+
+Therefore, from the above regression model, we can see that the influence of cognate on the correct green is still very significant. Of course, our research still has certain limitations, such as insufficient data and insufficient diversity and comprehensiveness in the optimization and comparison of models.
+
 
 
 
