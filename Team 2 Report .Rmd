@@ -18,7 +18,7 @@ In this project, we explored the "cognate effect" in bilingual aphasia patients.
 
 Our client, Manuel Marte, is studying Spanish - English bilingual individuals with aphasia and seeks to understand the "cognate effect" for these subject and how it compares with healthy subjects which have been previously studied. Our dataset based on Boston Naming Test: patients are asked to name an object both in English and Spanish. 
 
-We have 26 patients in the dataset, who age from 25 to 80. 22 of them are Spanish dominant patient and 4 of them are English dominant patient. In accuracy column, we coded people correctly name the object into 0 and people incorrectly name the object into 1. In cog column, we coded cognate word into 1 and non-cognate word into 0. In diff column, we leveled our word from difficult 1 to difficult 6 based on the report of gollan2007. Because each patient is unique in our analysis, so we took subject as random intercept. L2AoA indicates the age of a patient acquire the non native language. In language column, 1 means Spanish is this patient's native language and English is non-native language, 0 is the opposite. 
+We have 27 patients in the dataset, who age from 25 to 80. 23 of them are Spanish dominant patient and 4 of them are English dominant patient. In accuracy column, we coded people correctly name the object into 0 and people incorrectly name the object into 1. In cog column, we coded cognate word into 1 and non-cognate word into 0. In diff column, we leveled our word from difficult 1 to difficult 6 based on the report of gollan2007. Because each patient is unique in our analysis, so we took subject as random intercept. L2AoA indicates the age of a patient acquire the non native language. In language column, 1 means Spanish is this patient's native language and English is non-native language, 0 is the opposite. 
 
 In the following part, we mainly interpret the results of logistic regression and multinomial regression. 
 
@@ -114,7 +114,7 @@ for (i in 1:1187) {
 
 
 The first multinomial regression model is to set cognateness and difficulty levels of words as fixed effects and subjects as random effects to assess the effects of cognateness and difficulty levels at varied levels of random effects.
-```{r}
+```{r, warning=FALSE}
 b1 <- brm (response ~ cognate+ diff+(1|subject) , data=mult, family="categorical")
 #print(summary(b1))
 ```
@@ -124,11 +124,11 @@ $$ln(\frac{Pr(response=both incorrect)}{Pr(response=bothcorrect)}=\boldsymbol\al
 where i indexes patients (1 to 27) and j indexes words (1 to 44).
 
 
-The second multinomial model is take the demographic information into consideration, so we add L2AoA and Language into fixed effects. 
+The second multinomial model is to take the demographic information into consideration, so we add L2AoA and Language into fixed effects. 
 
-```{r}
+```{r, warning=FALSE}
 b2 <- brm (response ~ cognate+ diff+(1|subject)+L2AoA+Language, data=mult,family="categorical",save_all_pars=TRUE)
-print(summary(b2))
+#print(summary(b2))
 ```
 
 
@@ -161,7 +161,7 @@ Figure 1: when patients are testing on cognates, the probability of answering wo
 
 We tried logistic regression. We still divide the data into two groups: Spanish and English. We first included only cognate as the only factor, as our baseline to find the optimal model by comparing it. By using the lme4 package, we divide the words into different subject levels. When the words are in English and have the same difficulty level, cognate words will have a higher probability (94.43% higher) to answer correctly. When the words are in Spanish and the difficulty level is the same, cognate words will have a higher probability (76.195.% higher) to answer correctly.
 
-Before the fit model, we processed the missing data in the data, and explored the influence of Spanish and English cognate words on the accuracy rate. We divided the data of all subjects into four categories, 1. Spanish and English is correct, 2. Spanish is correct, English is wrong, 3. Spanish is wrong, and English is correct. 4. Both languages are wrong. At the same time, considering the differences of each participant to words, we will use random intercept to express this phenomenon. Our group fits three mutinomial equations, and compares the influence of cognate words through the LOO equation. In the first equation, our group did not include any demographic information. We will use it as a baseline to compare with other models to arrive at a relatively optimal model. In b4, we included demographic information AOA and language as variables. We use cognate as the independent variable and the probability of being correct as the dependent variable. It can be seen that with the inclusion of demographic data, as the degree of cognate becomes stronger, the possibility of simultaneous errors in two languages gradually decreases. The probability that the pair and all are correct gradually rises. Therefore, according to the results of the graph, we can conclude that the influence of cognate has a positive influence on the correctness rate. When we replace cognate with difficulty, the possibility of correctness decreases as the difficulty increases, and the possibility of error increases, which is in line with our expectations. It also proved the reliability of the model.
+Before the fit model, we processed the missing data in the data, and explored the influence of Spanish and English cognate words on the accuracy rate. We divided the data of all subjects into four categories, 1. Spanish and English is correct, 2. Spanish is correct, English is wrong, 3. Spanish is wrong, and English is correct. 4. Both languages are wrong. At the same time, considering the differences of each participant to words, we will use random intercept to express this phenomenon. Our group fits three mutinomial equations, and compares the influence of cognate words through the LOO equation. In the first equation, our group did not include any demographic information. We will use it as a baseline to compare with other models to arrive at a relatively optimal model. In the second multinomial logistic regression model, we included demographic information AOA and language as variables. We use cognate as the independent variable and the probability of being correct as the dependent variable. It can be seen that with the inclusion of demographic data, as the degree of cognate becomes stronger, the possibility of simultaneous errors in two languages gradually decreases. The probability that the pair and all are correct gradually rises. Therefore, according to the results of the graph, we can conclude that the influence of cognate has a positive influence on the correctness rate. When we replace cognate with difficulty, the possibility of correctness decreases as the difficulty increases, and the possibility of error increases, which is in line with our expectations. It also proved the reliability of the model.
 
 Therefore, from the above regression model, we can see that the influence of cognate on the correct green is still very significant. Of course, our research still has certain limitations, such as insufficient data and insufficient diversity and comprehensiveness in the optimization and comparison of models.
 
