@@ -146,10 +146,11 @@ invisible({capture.output({
 coef2<-data.frame(fixef(b2))
 coef2<-coef2[4:15,]
 coef2<-cbind(rownames(coef2),coef2)
-rownames(coef)<-NULL
+rownames(coef2)<-NULL
 colnames(coef2)<-c("Predictor","Estimate","Est.Error","Q2.5","Q97.5")
 #coef2
 ```
+
 ```{r}
 ggplot(coef2,aes(x=Estimate,y=Predictor,xmin=Q2.5,xmax=Q97.5))+geom_point()+geom_errorbarh(height=0)+geom_text(aes(label=round(Estimate,digits=2)),vjust=-0.5,size=3)+labs(x="Coefficient Estimate",y="Predictor")+geom_vline(xintercept=0,color="red")+theme_light()
 ```
