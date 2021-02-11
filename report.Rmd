@@ -1,0 +1,213 @@
+---
+title: "Cognate-effect Final Report"
+author: "Ziyi Bai; Yu Du; Xiaozhou Lu; Jinzhe Zhang"
+date: "12/18/2020"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE,warning=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+pacman::p_load("ggplot2","tidyverse","rstanarm","dplyr","pwr","MASS","arm","lme4","tidyr","boot","brms","kableExtra")
+```
+
+# Abstract
+
+In this project, we explored the "cognate effect" in bilingual aphasia patients. After including the information of patient's accuracy from the information of our client Manuel Marte, we layered the difficulty of the words from 1 to 6 and took each patient's age of acquisition of non native language into consideration. Based on the characteristic of our dataset, we built multilevel logistic regression models with random intercept and multinomial logistic regression models with random intercept to interpret the cognate effect. The multilevel logistic regression shows that cognate words tend to more likely to be answered correctly. The multinomial logistic regression models are convergence for all variables. Then, in the following part, we will discuss the results of each model in detail.
+
+# Introduction
+
+Our client, Manuel Marte,is studying Spanish - English bilingual individuals with aphasia and seeks to understand the "cognate effect" for these subject and how it compares with healthy subjects which have been previously studied. Our dataset based on Boston Naming Test: patients are asked to name an object both in English and Spanish. 
+
+We have 27 patients in the dataset, 23 of them are Spanish dominant patients and 4 of them are English dominant patients. In accuracy column, we coded people correctly name the object into 0 and people incorrectly name the object into 1. In cognate column, we coded cognate word into 1 and non-cognate word into 0. In diff column, we leveled our words from difficulty 1 to difficulty 6 based on the article *Gollan 2007*. Because each patient is unique in our analysis, so we took subject as random intercept. L2AoA indicates the age of a patient acquire the nonnative language. In language column, 0 means Spanish is this patient's native language and English is nonnative language, 1 is the opposite. 
+
+In the following part, we mainly interpret the results of multilevel logistic regression models and multinomial logistic regression models. 
+
+# Multilevel Logistic Regression Model
+
+We first fit the model using logistic regression with each subject as mixed effect for both English words and Spanish words, because the performance of different subjects can be somehow different. In the first model. We set cognateness and difficulty levels of words ranging from 1 to 6 as predictors to fit a model predicting the accuracy.
+
+The coefficients of logistic mixed model for English words are as follows. 
+
+```{r}
+#Load the data.
+eng3<-read.csv('eng3.csv')
+spa3<-read.csv('spa3.csv')
+```
+
+
+```{r echo=FALSE}
+M5 <- glmer(accuracy~cognate+(1|subject)+diff,data=eng3,family=binomial(link="logit"))
+print(summary(M5))
+coef(M5)
+```
+
+The intercept of regression functions are different for each subject. Let's take coefficients for subject 10 as an example to interpret these coefficients. The probability of a correct naming for subject 10 is 
+$$ p_{10,English}(accuracy=1)=\frac{1}{1+e^{-(2.24+0.74*cognate-0.88*difficulty)}}$$
+
+
+That is to say, if subject 10 is trying to name an English cognate with difficulty level 1, the probability of naming it correctly is 89.1%. While if subject 10 is trying to name an English non-cognate with difficulty level 1, the probability of naming it correctly is non-cognate is 79.6%. Although the performance between different subjects can vary greatly, the coefficient of cognate is positive, so the patients are more likely to name a cognate correctly than to name a non-cognate. 
+
+The same is true for Spanish words as follows.  
+
+```{r echo=FALSE}
+M6 <- glmer(accuracy~cognate+(1|subject)+diff,data=spa3,family=binomial(link="logit"))
+print(summary(M6))
+coef(M6)
+```
+
+We also take subject 10 as an example. The possibility for a correct naming is
+$$ p_{10,Spanish}(accuracy=1)=\frac{1}{1+e^{-(2.09+1.16*cognate-0.84*difficulty)}}$$
+So if subject 10 is trying to name a Spanish cognate with difficulty level 1, the probability of naming it correctly is 91.8%. And if subject 10 is trying to name a Spanish non-cognate with difficulty level 1, the probability of naming it correctly is 77.8%.
+
+Then let's take demographic information into consideration. For English words, the result is shown as follows. 
+
+```{r echo=FALSE, warning=FALSE}
+M61<- glmer(accuracy~cognate+(1|subject)+diff+L2AoA+Language,data=eng3, family=binomial(link="logit"))
+coef(M61)
+```
+
+We also have similar interpretation, that for subject 10, the possibility of naming it correctly is 
+$$p_{10,English}(accuracy=1)=\frac{1}{1+e^{-(3.95+0.75*cognate-0.89*difficulty-0.17*L2AoA-0.94*Language)}}$$
+
+And for Spanish words with demographic information:
+
+```{r echo=FALSE}
+M62<- glmer(accuracy~cognate+(1|subject)+diff+L2AoA+Language,data=spa3, family=binomial(link="logit"))
+coef(M62)
+```
+
+For subject 10, the possibility of naming it correctly is 
+$$p_{10,Spanish}(accuracy=1)=\frac{1}{1+e^{-(1.58+1.16*cognate-0.84*difficulty+0.05*L2AoA-1.59*Language)}}$$
+
+We also notice that, although the performance between different subjects can vary greatly, the coefficients of cognateness are both positive for English and Spanish, no matter we include demographic information or not. So the patients are more likely to name a cognate correctly than to name a non-cognate.
+
+
+# Multinomial Logistic Regression Model
+ 
+As shown in the previous part, the result from multilevel model tells us that patients are more likely to name a cognate correctly than to name a non-cognate. We then want to consider the patients' responses in the English test and Spanish test jointly, so we choose to fit mixed-effects multinomial logistic regression models using the brms package. We coded the responses in 4 levels. response=0: the patient named a word incorrectly in both English and Spanish. response=1: the patient only named a word correctly in Spanish. response=2: the patient only named a word correctly in English. response=3: the patient named a word correctly in both English and Spanish. We will assess the relationship between these 4 responses and cognateness of words based on the result from the multinomial model. 
+```{r}
+#multinomial model data prepared:
+multi.data = inner_join(eng3, spa3, by = c("Record.ID", "word"))
+multi.data<-multi.data %>% dplyr::select(Record.ID, accuracy.x, accuracy.y, cognate.x, L2AoA.x, Language.x,diff.x,subject.x)
+names(multi.data)[2:8] = c("acc.english","acc.spanish","cognate","L2AoA","Language","diff","subject")
+#Responses: 0 = both incorrect; 1 = spanish correct; 2 = english correct; 3 = both correct
+multi.data$response = with(multi.data, ifelse(acc.english == 0 & acc.spanish == 0, 0, ifelse(acc.english == 0 & acc.spanish == 1, 1, ifelse(acc.spanish==0, 2, 3))))
+```
+
+The first multinomial logistic regression model takes cognateness and difficulty levels of words as fixed effects and subjects as random effects to assess the effects of cognateness and difficulty levels at varied levels of random effects.
+```{r, warning=FALSE, include=FALSE}
+invisible({capture.output({
+  b1 <- brm (response ~ cognate+ diff+(1|subject) , data=multi.data, family="categorical")
+})})
+#print(summary(b1))
+```
+
+
+```{r}
+coef<-data.frame(fixef(b1))
+coef<-coef[4:9,]
+coef<-cbind(rownames(coef),coef)
+rownames(coef)<-NULL
+colnames(coef)<-c("Predictor","Estimate","Est.Error","Q2.5","Q97.5")
+#coef
+```
+
+```{r}
+ggplot(coef,aes(x=Estimate,y=Predictor,xmin=Q2.5,xmax=Q97.5))+geom_point()+geom_errorbarh(height=0)+geom_text(aes(label=round(Estimate,digits=2)),vjust=-0.5,size=3)+labs(x="Coefficient Estimate",y="Predictor")+geom_vline(xintercept=0,color="red")+theme_light()
+```
+
+The summary output of multinomial logistic regression model has a block of coefficients. Each of these blocks has one row of values corresponding to a model equation. The baseline outcome here is **response=0**. For example, for the subject 10, the model equation for **response=3** comparing to the baseline outcome would be 
+$$ln(\frac{Pr(response=3)}{Pr(response=0)})=mu3_-intercept+1.83{(cognate=1)}-1.54{difficulty_{j}}$$
+where j indexes words (1 to 44).
+
+A one-unit increase in the variable difficulty level is associated with 1.54 decrease in the relative log odds of response=3 (correct in both languages) vs.response=0 (incorrect in both languages). The relative log odds of response=3 vs. response=0 will increase by 1.83 if the subject 10 is trying to name a cognate word rather than a noncognate word.
+
+The second multinomial logistic regression model takes the demographic information into consideration, so we add L2AoA and Language into fixed effects. 
+
+```{r, warning=FALSE, include=FALSE}
+invisible({capture.output({
+  b2 <- brm (response ~ cognate+ diff+(1|subject)+L2AoA+Language, data=multi.data,family="categorical",save_all_pars=TRUE)
+})})
+#print(summary(b2))
+```
+
+```{r}
+coef2<-data.frame(fixef(b2))
+coef2<-coef2[4:15,]
+coef2<-cbind(rownames(coef2),coef2)
+rownames(coef2)<-NULL
+colnames(coef2)<-c("Predictor","Estimate","Est.Error","Q2.5","Q97.5")
+#coef2
+```
+
+```{r}
+ggplot(coef2,aes(x=Estimate,y=Predictor,xmin=Q2.5,xmax=Q97.5))+geom_point()+geom_errorbarh(height=0)+geom_text(aes(label=round(Estimate,digits=2)),vjust=-0.5,size=3)+labs(x="Coefficient Estimate",y="Predictor")+geom_vline(xintercept=0,color="red")+theme_light()
+```
+
+After adding the demographic information, the model equation for **response=3** comparing to the baseline outcome for the subject 10 would be
+$$ln(\frac{Pr(response= 3)}{Pr(response= 0)})=mu3_-intercept+1.83{(cognate=1)}-1.55 difficulty_{j}-0.1L2AoA_{10}+\boldsymbol\beta_{4}-2.11{Language_{10}}$$
+where j indexes words (1 to 44).
+
+A one-unit increase in the variable difficulty level is associated with 1.55 decrease in the relative log odds of response=3 (correct in both languages) vs.response=0 (incorrect in both languages). The relative log odds of response=3 vs. response=0 will increase by 1.83 if the subject 10 is trying to name a cognate word rather than a noncognate word.
+
+
+## Model Comparison
+
+To investigate which multinomial model gives a better fit for the data, we compare two models via the approximate LOO (leave-one-out cross-validation).
+```{r, warning=FALSE}
+loo1<-loo(b1)
+loo2<-loo(b2)
+loo_compare(loo1,loo2)
+```
+
+As shown above, the second multinomial model has a better fit. The elpd_diff=0 in the first row tells us that the difference between the preferred model and the second multinomial model itself is 0.
+
+## Figure 1. The plot to visualize the relationship between the cognateness and responses.
+
+```{r}
+plot(conditional_effects(b2, effects = "cognate",categorical=TRUE))
+```
+
+Figure 1: When patients are testing on cognates, the probability of answering words incorrectly in both English and Spanish decreases and the probability of answering correctly in both English and Spanish increases.
+
+## Figure 2. The plot to visualize the relationship between difficulty levels and responses.
+
+```{r}
+plot(conditional_effects(b2, effects = "diff",categorical=TRUE))
+```
+
+Figure 2: When patients are testing on words with higher difficulty levels, the probability of answering the words correctly in both English and Spanish decreases and the probability of answering incorrectly in both English and Spanish increases. 
+
+# Conclusion
+
+We tried multilevel logistic regression. We still divide the data into two groups: Spanish and English. We first included only cognate as the only factor, as our baseline to find the optimal model by comparing it. By using the lme4 package, we divide the words into different subject levels. When the words are in English and have the same difficulty level, cognate words will have a higher probability to answer correctly. When the words are in Spanish and the difficulty level is the same, cognate words will have a higher probability to answer correctly.
+
+Before fitting model, we processed the missing data, and explored the influence of Spanish and English cognate words on the accuracy rate. We divided the data of all subjects into four categories, 1. Spanish and English is correct. 2. Spanish is correct, English is wrong. 3. Spanish is wrong, and English is correct. 4. Both languages are wrong. At the same time, considering the differences of each participant to words, we will use random intercept to express this phenomenon. Our group fits two multinomial models, and compares the influence of cognate words through the LOO equation. In the first model, our group did not include any demographic information. We will use it as a baseline to compare with other models to arrive at a relatively optimal model. In the second model, we included demographic information L2AoA and language as variables. We use cognate as the independent variable and the probability of being correct as the dependent variable. It can be seen that with the inclusion of demographic data, as the degree of cognate becomes stronger, the probability of simultaneous errors in two languages gradually decreases. The probability that the pair and all are correct gradually rises. Therefore, according to the results of the graph, we can conclude that the influence of cognate has a positive influence on the correctness rate. When we replace cognate with difficulty, the possibility of correctness decreases as the difficulty increases, and the possibility of error increases, which is in line with our expectations. It also proved the reliability of the model.
+
+Therefore, from the above regression model, we can see that the influence of cognate on the correctness is still very significant. Of course, our research still has certain limitations, such as insufficient data and insufficient diversity and comprehensiveness in the optimization and comparison of models.
+
+# Appendix
+
+### Figure 3. The random effects of the first multinomial logistic regression model.
+```{r}
+ranef(b1)
+```
+
+### Figure 4. The random effects of the second multinomial logistic regression model.
+```{r}
+ranef(b2)
+```
+
+### Figure 5. The trace and density plot of the second multinomial logistic regression model for fixed-effect "cognate".
+```{r}
+plot(b2, pars = c("cognate"))
+```
+
+### Figure 6. Posterior Predictive Check for the second multinomial logistic regression model.
+```{r}
+pp_check(b2,nsamples=100)
+```
+
